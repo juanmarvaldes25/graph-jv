@@ -6,6 +6,7 @@ import App from './App';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { MsalProvider } from '@azure/msal-react';
 import { msalConfig } from './authConfig';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
 // Bootstrap components
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -17,9 +18,10 @@ const msalInstance = new PublicClientApplication(msalConfig);
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-    <React.StrictMode>
+     <FluentProvider theme={webLightTheme}>
         <MsalProvider instance = {msalInstance}>
             <App />
         </MsalProvider>
-    </React.StrictMode>
+    </FluentProvider>
+   
 )
