@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { callMsGraph, callMsGraphUsers } from '../graph.ts';
+import React, { useState, useEffect } from 'react';
+import { callMsGraph, callMsGraphUsers, callPeopleNameAndEmail } from '../graph.ts';
 import type { JSXElement } from "@fluentui/react-components";
+import { TokenProvider } from '../TokenProvider.js';
 
 import {
   TagPicker,
@@ -18,13 +19,39 @@ import { Tag, Avatar, Field } from "@fluentui/react-components";
 //https://graph.microsoft.com/v1.0/users?$filter=startsWith(displayName,'I')&$select=id,displayName,mail
 
 export const GraphPicker = (): JSXElement => {
- const [query, setQuery] = React.useState<string>(""); //initial state for the query
-  const [selectedOptions, setSelectedOptions] = React.useState<string[]>([]);//initial state for the slected options - array of strings
+ const [query, setQuery] = useState<string>(""); //initial state for the query
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);//initial state for the slected options - array of strings
+ const [loading, setLoading] = useState<boolean>(false);
+  const { token, loading: tokenLoading, error: tokenError } = TokenProvider();
 
   //Experimental - dynamic options from graph - needs work -----------------
-  const [options, setOptions] = React.useState<string[]>([]);
+  const [options, setOptions] = useState<string[]>([]);
 
   //=----------------------------------------
+
+//handles te graph call
+ useEffect(() => {
+    if (query.length < 2 || !token) {
+      setOptions([]); // Clear options if query is too short
+      return;
+    }
+
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const users = await callPeopleNameAndEmail(token, query); //change to right call
+        // Assuming callMsGraphUsers returns an array of user display names
+        setOptions(users.value.map((user: any) => user.displayName));
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [query]); //Why this array here : NVM IT RUNS BASED ON THIS DEPENDENCY ARRAY
 
 const onOptionSelect: TagPickerProps["onOptionSelect"] = (e, data) => { //ON SELECT, not on type
     if (data.value === "no-matches") {
@@ -61,6 +88,9 @@ const onOptionSelect: TagPickerProps["onOptionSelect"] = (e, data) => { //ON SEL
       option.toLowerCase().includes(query.toLowerCase()), //this is the actual filtering based of query (search text sts)
   });
 
+if (tokenLoading) return <div>Loading...</div>;
+  if (tokenError) return <div>Error: {tokenError}</div>; //Loading states 
+
  return(
 
  <Field label="Select Employees" style={{ maxWidth: 400 }}>
@@ -84,7 +114,10 @@ const onOptionSelect: TagPickerProps["onOptionSelect"] = (e, data) => { //ON SEL
           <TagPickerInput
             aria-label="Select Employees"
             value={query}
-            onChange={(e) => setQuery(e.target.value)} //this onChange in the query, call graph
+           // onChange={(e) => setQuery(e.target.value)} //this onChange in the query, call graph
+
+           onChange = {(e) => setQuery(e.target.value)} //set teh query to the typed value
+           //UseEffect gets called when the  condition is reached?
           />
         </TagPickerControl>
 

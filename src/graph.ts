@@ -45,9 +45,9 @@ export async function callPeopleNameAndEmail(accessToken: string, query: string)
     //sanitise
     query = query.replace(/[^a-zA-Z0-9\s\.\-_@]/g, ""); //removes any characters that are not letters, numbers, spaces, dots, dashes, underscores or @
     query.trim();
-    
+
     return fetch(graphConfig.graphUsersEndpoint+ 
-        '?$filter=endsWith(displayName,\'' + query + '\')&$orderBy=displayName&$select=id,displayName,mail',
+        '?$filter=startsWith(displayName,\'' + query + '\')&$select=displayName',
         options).then(response => response.json()).catch(error => console.log(error));
         
 }

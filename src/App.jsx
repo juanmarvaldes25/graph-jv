@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 
 import { PageLayout } from './components/PageLayout';
 import { loginRequest } from './authConfig';
-import { callMsGraph, callMsGraphUsers } from './graph';
+import { callMsGraph, callMsGraphUsers } from './graph.ts';
 import { ProfileData } from './components/ProfileData';
 import { OtherUsersData} from './components/OtherUsersData';
+import { GraphPicker } from './components/GraphPicker.tsx';
+
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
 import './App.css';
@@ -58,9 +60,9 @@ const ProfileContent = () => {
                  <Button variant="secondary" onClick={RequestOtherUsers}>
                     Request Other Users
                 </Button>
-            )
-        
+            )    
         }
+           <GraphPicker></GraphPicker>
         </>
     );
 };
